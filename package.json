@@ -1,0 +1,32 @@
+{
+  "name": "vibe-framework-demo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Demo project showing vibe-framework and autoheal-locator usage from npm",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "test:parallel": "playwright test --workers=4",
+    "test:debug": "playwright test --debug"
+  },
+  "keywords": [
+    "vibe-framework",
+    "autoheal-locator",
+    "playwright",
+    "automation",
+    "testing",
+    "ai"
+  ],
+  "author": "Sanjay Gorai",
+  "license": "MIT",
+  "dependencies": {
+    "@sdetsanjay/vibe-framework": "^1.0.0",
+    "dotenv": "^17.2.3"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.57.0",
+    "playwright": "^1.40.0",
+    "typescript": "^5.2.0"
+  }
+}
