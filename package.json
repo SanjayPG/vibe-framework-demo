@@ -8,7 +8,26 @@
     "test:headed": "playwright test --headed",
     "test:ui": "playwright test --ui",
     "test:parallel": "playwright test --workers=4",
-    "test:debug": "playwright test --debug"
+    "test:debug": "playwright test --debug",
+    "test:view": "node utilities/test-and-view.js",
+    "test:reports": "node utilities/test-and-view.js && npx playwright show-report",
+    "test:advanced": "playwright test tests/advanced-elements.spec.ts",
+    "test:advanced:headed": "playwright test tests/advanced-elements.spec.ts --headed",
+    "test:advanced:ui": "playwright test tests/advanced-elements.spec.ts --ui",
+    "test:selects": "playwright test tests/advanced-elements.spec.ts -g \"Select Boxes\"",
+    "test:dialogs": "playwright test tests/advanced-elements.spec.ts -g \"Dialog Handling\"",
+    "test:windows": "playwright test tests/advanced-elements.spec.ts -g \"Window Switching\"",
+    "test:login-setup": "playwright test tests/login-setup-example.spec.ts",
+    "test:login-setup:headed": "playwright test tests/login-setup-example.spec.ts --headed",
+    "clean": "node utilities/clean-sessions.js",
+    "view-report": "node utilities/view-reports.js",
+    "view-vibe": "node utilities/view-reports.js",
+    "view-playwright": "npx playwright show-report",
+    "view-unified": "node utilities/generate-unified-report.js && start vibe-reports/unified-report.html",
+    "view-consolidated": "node utilities/generate-consolidated-report.js && start vibe-reports/consolidated-report.html",
+    "unified": "node utilities/generate-unified-report.js",
+    "consolidated": "node utilities/generate-consolidated-report.js",
+    "report": "node utilities/view-reports.js"
   },
   "keywords": [
     "vibe-framework",
@@ -21,11 +40,12 @@
   "author": "Sanjay Gorai",
   "license": "MIT",
   "dependencies": {
-    "@sdetsanjay/vibe-framework": "^1.0.0",
+    "@sdetsanjay/vibe-framework": "file:../vibe-framework",
     "dotenv": "^17.2.3"
   },
   "devDependencies": {
     "@playwright/test": "^1.57.0",
+    "@types/node": "^25.4.0",
     "playwright": "^1.40.0",
     "typescript": "^5.2.0"
   }

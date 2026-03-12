@@ -1,10 +1,30 @@
-# Vibe Framework Demo
+# Vibe Framework Demo 🎯
 
-Demo project showcasing how to use [@sdetsanjay/vibe-framework](https://www.npmjs.com/package/@sdetsanjay/vibe-framework) for natural language test automation with Playwright.
+Demo project showcasing [@sdetsanjay/vibe-framework](https://www.npmjs.com/package/@sdetsanjay/vibe-framework) - write test automation in natural language with Playwright.
+
+## 📑 Table of Contents
+
+- [What is Vibe Framework?](#what-is-vibe-framework)
+- [Architecture](#️-architecture)
+- [Features](#features)
+- [Installation](#installation)
+- [How to Run Tests](#-how-to-run-tests) ⭐ **Start Here**
+- [Configuration](#configuration)
+- [Hybrid Approach](#-hybrid-approach) (Recommended)
+- [Advanced Features](#advanced-features)
+  - [Hooks & Lifecycle](#-hooks--lifecycle)
+  - [Advanced Elements](#-advanced-elements)
+  - [Parallel Testing](#-parallel-testing)
+  - [Smart Caching & Training Mode](#-smart-caching--training-mode)
+- [Reports & Results](#-reports--results)
+- [Troubleshooting](#troubleshooting)
+- [Documentation](#documentation)
+
+---
 
 ## What is Vibe Framework?
 
-Vibe Framework is a natural language automation library that lets you write test commands in plain English. Instead of brittle CSS selectors, you use AI-powered natural language:
+Vibe Framework lets you write test commands in plain English instead of brittle CSS selectors:
 
 ```typescript
 await session.do('click the login button');
@@ -12,49 +32,117 @@ await session.do('type hello@example.com into email field');
 await session.check('verify dashboard is loaded');
 ```
 
-Built on [@sdetsanjay/autoheal-locator](https://www.npmjs.com/package/@sdetsanjay/autoheal-locator) for intelligent element detection and self-healing capabilities.
+**Best Part?** You can **freely mix Playwright with natural language**:
 
-## Features Demonstrated
+```typescript
+// Use Playwright for what it's good at
+await page.goto('https://app.com');
+await page.getByRole('textbox', { name: 'username' }).fill('john');
 
-- ✅ Natural language automation commands
-- ✅ Multiple AI provider support (Groq, Gemini, OpenAI, etc.)
-- ✅ Smart caching for 95-99% latency reduction
-- ✅ Training mode for zero-cost CI/CD runs
-- ✅ HTML reporting with screenshots and videos
-- ✅ Parallel test execution (2.5x-3.5x speedup)
-- ✅ Self-healing element location
+// Use Natural Language for dynamic elements
+await session.do('click the login button');
 
-## Prerequisites
+// Use Playwright for assertions
+expect(page.url()).toContain('dashboard');
+```
 
-- Node.js 16 or higher
-- npm (comes with Node.js)
+Built on [@sdetsanjay/autoheal-locator](https://www.npmjs.com/package/@sdetsanjay/autoheal-locator) with intelligent element detection and self-healing.
+
+---
+
+## 🏗️ Architecture
+
+### How It Works - Smart Caching & Self-Healing
+
+```mermaid
+flowchart TD
+    Start([User writes Natural Language]) --> Input["session.do('click login button')"]
+
+    Input --> ParseCache{Parse Cache?}
+    ParseCache -->|Hit ✅| Parsed[Cached Parse<br/>⚡ Instant]
+    ParseCache -->|Miss| AI1[AI Parser<br/>~500ms<br/>💰 $0.005]
+    AI1 --> SaveParse[Save Parse] --> Parsed
+
+    Parsed --> SelCache{Selector Cache?}
+    SelCache -->|Hit ✅| Cached["#login-button<br/>⚡ 100ms<br/>💰 $0"]
+    SelCache -->|Miss| AutoHeal[AutoHeal Finder]
+
+    AutoHeal --> Try1{Original<br/>Locator?}
+    Try1 -->|Found ✅| Save1[Save to Cache]
+    Try1 -->|Not Found| AI2[AI DOM Analysis<br/>~800ms<br/>💰 $0.01]
+
+    AI2 --> Try2{Element<br/>Found?}
+    Try2 -->|Yes ✅| Save1
+    Try2 -->|No ❌| Visual[Visual AI<br/>~2000ms<br/>💰 $0.03]
+
+    Visual --> Try3{Found?}
+    Try3 -->|Yes ✅| Save1
+    Try3 -->|No ❌| Fail[❌ Element Not Found]
+
+    Save1 --> Cached
+    Cached --> Execute[Execute Playwright Action]
+
+    Execute --> Success[✅ Complete]
+    Success --> Report[📊 Generate Reports]
+    Fail --> Report
+
+    style Parsed fill:#ccffcc
+    style Cached fill:#ccffcc
+    style Success fill:#ccffcc
+    style AI1 fill:#fff4cc
+    style AI2 fill:#ffebcc
+    style Visual fill:#ffe0cc
+    style Fail fill:#ffcccc
+```
+
+**Key Points**:
+- 🎯 **Smart Caching**: 93% faster after first run, $0 cost
+- 🔧 **Self-Healing**: 4-level healing (Original → DOM AI → Visual AI)
+- 📊 **Auto Reporting**: HTML/JSON/CSV with videos & screenshots
+- 💰 **Cost Tracking**: Real-time cost analysis per action
+- ⚡ **Performance**: First run ~1.4s → Cached ~0.1s
+
+**See complete architecture**: [ARCHITECTURE_FLOW.md](./ARCHITECTURE_FLOW.md)
+
+---
+
+## Features
+
+- ✅ **Natural language automation** - Write commands in plain English
+- ✅ **Hybrid approach** - Mix Playwright + Natural Language freely (recommended)
+- ✅ **Multiple AI providers** - Groq, Gemini, OpenAI, DeepSeek, Anthropic, Local
+- ✅ **Smart caching** - 95-99% latency reduction after first run
+- ✅ **Training mode** - Zero-cost CI/CD runs
+- ✅ **Beautiful reporting** - HTML reports with screenshots, videos, token tracking
+- ✅ **Parallel execution** - Thread-safe, 2.5x-3.5x speedup
+- ✅ **Self-healing** - Automatic element recovery
+- ✅ **Advanced elements** - Select boxes, alerts, window switching
+- ✅ **Cost analysis** - Real-time AI cost tracking per action
+
+---
 
 ## Installation
 
-1. Clone this repository:
+### Prerequisites
+- Node.js 16 or higher
+- npm (comes with Node.js)
+
+### Steps
+
+1. **Create a new Playwright project (if you don't have one):**
 ```bash
-git clone https://github.com/SanjayPG/vibe-framework-demo.git
-cd vibe-framework-demo
+npm init playwright@latest
 ```
 
-2. Install dependencies:
+2. **Install vibe-framework:**
 ```bash
-npm install
+npm install @sdetsanjay/vibe-framework
 ```
 
-3. Install Playwright browsers:
-```bash
-npx playwright install
-```
+3. **Configure your API key:**
 
-## Configuration
+Create a `.env` file in your project root:
 
-1. Copy the example environment file:
-```bash
-cp .env.example .env
-```
-
-2. Edit `.env` and add your API key:
 ```env
 # Choose one (Groq recommended for getting started - fast & free!)
 GROQ_API_KEY=your-groq-api-key-here
@@ -71,38 +159,9 @@ GROQ_API_KEY=your-groq-api-key-here
 - **Gemini** (Free Tier): https://aistudio.google.com/app/apikey
 - **OpenAI** (Paid): https://platform.openai.com/api-keys
 
-## Running Tests
+### Quick Start
 
-### Run all tests
-```bash
-npm test
-```
-
-### Run with UI mode (interactive)
-```bash
-npm run test:ui
-```
-
-### Run in headed mode (see browser)
-```bash
-npm run test:headed
-```
-
-### Run with parallel execution (faster)
-```bash
-npm run test:parallel
-```
-
-### Debug mode
-```bash
-npm run test:debug
-```
-
-## Test Examples
-
-### Basic Test (`tests/saucedemo.spec.ts`)
-
-Simple login flow using natural language:
+Create your first test file `tests/example.spec.ts`:
 
 ```typescript
 import { test } from '@playwright/test';
@@ -111,65 +170,334 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-test('Login to SauceDemo', async ({ page }) => {
+test('Login Example', async ({ page }) => {
   const session = vibe()
     .withPage(page)
     .withMode('smart-cache')
     .withAIProvider('GROQ', process.env.GROQ_API_KEY!)
-    .withReporting({ html: true, console: true })
     .build();
 
   await page.goto('https://www.saucedemo.com');
-
   await session.do('type "standard_user" into username field');
   await session.do('type "secret_sauce" into password field');
   await session.do('click the login button');
-
-  const result = await session.check('verify products page loaded');
-  console.log('Login successful:', result.success);
 
   await session.shutdown();
 });
 ```
 
-### Parallel Test Example
-
-See `tests/parallel-test.spec.ts` for thread-safe parallel execution example.
-
-### Multiple Providers Example
-
-See `tests/groq-test.spec.ts` for using different AI providers.
-
-## Project Structure
-
-```
-vibe-framework-demo/
-├── tests/                    # Test files
-│   ├── saucedemo.spec.ts    # Basic login flow
-│   ├── parallel-test.spec.ts # Parallel execution demo
-│   └── groq-test.spec.ts    # Groq provider example
-├── playwright.config.ts      # Playwright configuration
-├── .env.example             # Environment template
-├── .env                     # Your API keys (gitignored)
-├── package.json             # Dependencies
-└── README.md                # This file
+Run your test:
+```bash
+npx playwright test
 ```
 
-## Generated Artifacts
+### Clone Demo Project (Optional)
 
-After running tests, you'll find:
+To explore all examples and utilities:
+```bash
+git clone https://github.com/SanjayPG/vibe-framework-demo.git
+cd vibe-framework-demo
+npm install
+```
 
-- `playwright-report/` - Playwright HTML report
-- `vibe-reports/` - Vibe Framework HTML reports
-- `test-results/` - Test screenshots and traces
-- `autoheal-cache/` - Cached selectors (smart-cache mode)
-- `vibe-training/` - Training data (training mode)
+---
 
-## Features in Detail
+## 🚀 How to Run Tests
 
-### Smart Caching
+Choose between automated or manual workflow:
 
-Smart caching reduces AI calls by 95-99% by caching successful selectors:
+### Option 1: Use test-and-view.js (Recommended) ✅
+
+Run this **INSTEAD** of manual test commands:
+
+```bash
+# Using npm script (easiest)
+npm run test:view
+
+# Or with specific test file
+node utilities/test-and-view.js tests/saucedemo.spec.ts
+
+# Or with specific test line
+node utilities/test-and-view.js tests/saucedemo.spec.ts:56
+```
+
+**This does everything:**
+- 🧹 Cleans old reports
+- 🧪 Runs the test
+- 📊 Generates unified report
+- 🌐 Opens it automatically
+
+**Don't run any manual test commands - just use this script!**
+
+---
+
+### Option 2: Manual Testing (if you prefer)
+
+If you want to run tests manually with `npx playwright test`, follow this pattern:
+
+```bash
+# Step 1: Clean first
+npm run clean
+# or: node utilities/clean-sessions.js
+
+# Step 2: Run your test manually
+npm test                                   # All tests
+npx playwright test tests/file.spec.ts     # Specific test
+npx playwright test tests/file.spec.ts:56  # Specific test line
+
+# Step 3: View the report
+npm run view-unified
+```
+
+---
+
+### Which Should You Use?
+
+**Use Option 1 (test-and-view.js)** - it's simpler and does all 3 steps automatically!
+
+The only time to use manual commands is when you need specific Playwright flags:
+- `--debug` for debugging
+- `--ui` for UI mode
+- `--headed` to see the browser
+- `--workers=1` to run serially
+
+In those cases, clean first with `npm run clean`, then run your manual command, then view the report.
+
+**Bottom line: Pick one workflow, don't mix them!** 🎯
+
+---
+
+### Available npm Scripts
+
+```bash
+# Testing
+npm test                    # Run all tests
+npm run test:headed         # See browser
+npm run test:ui             # Interactive UI mode
+npm run test:parallel       # Parallel execution (4 workers)
+npm run test:debug          # Debug mode
+
+# Automated Workflow (Recommended)
+npm run test:view           # Clean + Test + Report + Open
+
+# Utilities
+npm run clean               # Clean old reports
+npm run view-report         # View latest report
+npm run view-unified        # Generate + view unified report
+npm run view-consolidated   # Generate + view consolidated report
+
+# Advanced Tests
+npm run test:advanced       # Advanced elements tests
+npm run test:selects        # Select boxes only
+npm run test:dialogs        # Alerts/Confirm/Prompt only
+npm run test:windows        # Window/tab switching only
+```
+
+---
+
+## Configuration
+
+### vibe.config.js
+
+Centralized configuration for video, reporting, and AI settings:
+
+```javascript
+module.exports = {
+  // Video Recording
+  video: {
+    mode: 'retain-on-failure',  // 'off' | 'on' | 'retain-on-failure' | 'on-first-retry'
+    size: { width: 1280, height: 720 },
+    dir: './vibe-reports/videos'
+  },
+
+  // Reporting
+  reporting: {
+    html: true,
+    json: true,
+    csv: true,
+    console: true,
+    includeScreenshots: true,
+    includeVideos: true,
+    outputDir: './vibe-reports'
+  },
+
+  // AI Provider
+  ai: {
+    provider: 'GROQ',  // 'GROQ' | 'GEMINI' | 'OPENAI' | etc.
+    apiKey: process.env.GROQ_API_KEY
+  },
+
+  // Cache Mode
+  mode: 'smart-cache'  // 'smart-cache' | 'training' | 'no-cache'
+};
+```
+
+### Environment Variables
+
+Override settings via environment variables:
+
+```bash
+VIBE_VIDEO_MODE=on npm test
+VIBE_HTML_REPORT=false npm test
+VIBE_AI_PROVIDER=GEMINI npm test
+VIBE_MODE=training npm test
+```
+
+---
+
+## 🎯 Hybrid Approach
+
+**Recommended**: Mix Playwright code with Vibe's natural language!
+
+### Quick Example
+
+```typescript
+test('hybrid approach', async ({ page }) => {
+  const session = vibe()
+    .withPage(page)
+    .withMode('smart-cache')
+    .build();
+
+  // ✅ Playwright for navigation
+  await page.goto('https://www.saucedemo.com');
+
+  // ✅ Playwright for known elements
+  await page.getByRole('textbox', { name: 'username' }).fill('standard_user');
+
+  // ✅ Natural Language for dynamic elements
+  await session.do('type "secret_sauce" into password field');
+  await session.do('click the login button');
+
+  // ✅ Playwright for assertions
+  expect(page.url()).toContain('inventory.html');
+
+  await session.shutdown();
+});
+```
+
+### When to Use What?
+
+| Task | Best Tool | Why |
+|------|-----------|-----|
+| Navigation | `page.goto()` | No element finding needed |
+| Known selectors | `page.locator()`, `page.getByRole()` | Fastest, $0 cost |
+| Dynamic elements | `session.do()` | AI finds it, then caches it |
+| Assertions | `expect()` | Deterministic and reliable |
+
+### The Philosophy
+
+```
+┌─────────────────────────────────────────────────────┐
+│  Use session.do()   → for INTERACTING with elements  │
+│  Use Playwright     → for NAVIGATION & ASSERTIONS    │
+└─────────────────────────────────────────────────────┘
+```
+
+**Full Guide**: [`HYBRID_APPROACH.md`](./HYBRID_APPROACH.md)
+
+**Working Examples**: [`tests/hybrid-demo.spec.ts`](./tests/hybrid-demo.spec.ts)
+
+---
+
+## Advanced Features
+
+### 🔄 Hooks & Lifecycle
+
+Vibe works seamlessly with all Playwright hooks:
+
+```typescript
+test.describe('My Tests', () => {
+  let session: any;
+
+  // ✅ Setup before each test
+  test.beforeEach(async ({ page }) => {
+    session = vibe()
+      .withPage(page)
+      .withMode('smart-cache')
+      .build();
+
+    // Login using natural language
+    await page.goto('https://app.com');
+    await session.do('type username into email field');
+    await session.do('type password into password field');
+    await session.do('click login button');
+  });
+
+  // ✅ REQUIRED: Cleanup after each test
+  test.afterEach(async () => {
+    if (session) {
+      await session.shutdown();  // Always call this!
+      session = null;
+    }
+  });
+
+  test('should view products', async ({ page }) => {
+    // Test starts already logged in!
+    const count = await page.locator('.product').count();
+    expect(count).toBeGreaterThan(0);
+  });
+});
+```
+
+**Important**: Always call `session.shutdown()` in `afterEach` for proper cleanup!
+
+**Full Guide**: [`HOOKS_AND_LIFECYCLE.md`](./HOOKS_AND_LIFECYCLE.md)
+
+**Examples**: [`tests/login-setup-example.spec.ts`](./tests/login-setup-example.spec.ts)
+
+---
+
+### 🎨 Advanced Elements
+
+Handle complex web interactions with natural language:
+
+**Select Boxes:**
+```typescript
+await session.do('select "United States" from country dropdown');
+await session.do('select "Premium" from subscription plan');
+```
+
+**Alerts/Dialogs:**
+```typescript
+page.once('dialog', async dialog => await dialog.accept());
+await session.do('click the alert button'); // Button cached
+```
+
+**Window Switching:**
+```typescript
+const pagePromise = context.waitForEvent('page');
+await session.do('click the open new window button'); // Cached
+
+const newPage = await pagePromise;
+const newSession = vibe().withPage(newPage).build();
+await newSession.do('click the accept button'); // Also cached
+```
+
+**Performance**: After caching, 90-95% faster with $0 AI cost!
+
+**Full Guide**: [`ADVANCED_ELEMENTS_GUIDE.md`](./ADVANCED_ELEMENTS_GUIDE.md)
+
+**Examples**: [`tests/advanced-elements.spec.ts`](./tests/advanced-elements.spec.ts)
+
+---
+
+### 🔀 Parallel Testing
+
+Vibe Framework is thread-safe with file-based locking:
+
+```bash
+# 2.5x-3.5x faster with 4 workers
+npm run test:parallel
+# or: npx playwright test --workers=4
+```
+
+Automatic cache synchronization prevents race conditions.
+
+---
+
+### 💾 Smart Caching & Training Mode
+
+**Smart Caching** reduces AI calls by 95-99%:
 
 ```typescript
 const session = vibe()
@@ -177,15 +505,13 @@ const session = vibe()
   .build();
 ```
 
-First run: Uses AI to find elements
-Subsequent runs: Instant lookups from cache
+- **First run**: Uses AI to find elements (~1.4s)
+- **Subsequent runs**: Instant lookups from cache (~0.1s)
 
-### Training Mode
-
-Record selectors once, replay in CI with **zero AI cost**:
+**Training Mode** for zero-cost CI/CD:
 
 ```typescript
-// Local: Record
+// Local: Record selectors
 const session = vibe()
   .startTraining('my-test-suite')
   .build();
@@ -198,33 +524,130 @@ const ciSession = vibe()
   .loadTrainingData('my-test-suite')
   .build();
 
-await ciSession.do('click login'); // Instant!
+await ciSession.do('click login'); // Instant, $0 cost!
 ```
 
-### Parallel Testing
+---
 
-Vibe Framework is thread-safe:
+## 📊 Reports & Results
+
+### What You Get
+
+After running tests, Vibe generates comprehensive reports with:
+
+- 📊 **Token & Cost Tracking** - AI usage and cost per action
+- ⚡ **Performance Metrics** - Latency breakdown (parse, find, execute)
+- 📈 **Cache Analytics** - Hit/miss rates and optimization insights
+- 📸 **Screenshots** - Click-to-enlarge lightbox
+- 🎥 **Video Recording** - Full test execution captured
+- 📁 **Multiple Formats** - HTML, JSON, and CSV exports
+- 🎯 **Interactive Timeline** - Search, filter, expand action details
+
+### Viewing Reports
+
+**Quick view:**
+```bash
+npm run view-unified      # Unified report (multiple sessions)
+npm run view-report       # Latest individual report
+npm run view-consolidated # Consolidated report (all merged)
+```
+
+**Automated workflow (recommended):**
+```bash
+npm run test:view  # Runs tests and opens report automatically
+```
+
+### Report Files
+
+All reports saved in `vibe-reports/`:
+- `unified-report.html` - Multi-session report with session selector
+- `consolidated-report.html` - All tests merged into one view
+- `index.html` - Latest individual report
+- `session-*.json` - Complete session data (JSON)
+- `actions-*.csv` - Action-level data (CSV)
+- `summary-*.csv` - Session summary (CSV)
+
+### Report Types
+
+| Report Type | Best For | Features |
+|-------------|----------|----------|
+| **Unified** | Parallel execution | Session selector, switch between workers |
+| **Consolidated** | CI/CD, overview | All tests merged, aggregated metrics |
+| **Individual** | Single test run | Detailed timeline for one session |
+
+---
+
+## Utility Scripts
+
+### utilities/ Folder
+
+Organized utility scripts for streamlined workflows:
+
+| Script | Purpose |
+|--------|---------|
+| `test-and-view.js` | Clean → Test → Report → Open (recommended) |
+| `clean-sessions.js` | Delete all test artifacts |
+| `view-reports.js` | Open latest report |
+| `generate-unified-report.js` | Generate unified report |
+| `generate-consolidated-report.js` | Generate consolidated report |
+
+### Usage Examples
 
 ```bash
-# 2.5x-3.5x faster with 4 workers
-npx playwright test --workers=4
+# Automated workflow (recommended)
+npm run test:view
+node utilities/test-and-view.js tests/file.spec.ts
+
+# Clean old reports
+npm run clean
+node utilities/clean-sessions.js
+
+# View reports
+npm run view-unified
+node utilities/generate-unified-report.js
 ```
 
-File-based locking prevents cache race conditions.
+**Full Documentation**: See [Utility Scripts section](#-how-to-run-tests) above
 
-### Video Recording
+---
 
-Automatically record and embed videos in reports:
+## Project Structure
 
-```typescript
-const session = vibe()
-  .withVideo('retain-on-failure')
-  .withReporting({
-    html: true,
-    includeVideos: true
-  })
-  .build();
 ```
+vibe-framework-demo/
+├── utilities/                         # 📦 Utility scripts
+│   ├── clean-sessions.js             # Clean all test artifacts
+│   ├── test-and-view.js              # Automated test workflow
+│   ├── view-reports.js               # View latest report
+│   ├── generate-unified-report.js    # Generate unified report
+│   └── generate-consolidated-report.js # Generate consolidated report
+├── tests/                            # Test files
+│   ├── saucedemo.spec.ts            # Basic login flow
+│   ├── hybrid-demo.spec.ts          # Hybrid approach examples
+│   ├── parallel-test.spec.ts        # Parallel execution demo
+│   ├── groq-test.spec.ts            # Groq provider example
+│   ├── advanced-elements.spec.ts    # Advanced elements
+│   ├── login-setup-example.spec.ts  # Login setup patterns
+│   └── helpers/                     # Test helpers
+├── test-pages/                       # HTML test pages
+│   ├── advanced-elements.html       # Advanced elements page
+│   └── new-window-content.html      # New window page
+├── vibe.config.js                    # Configuration file
+├── playwright.config.ts              # Playwright configuration
+├── .env.example                     # Environment template
+├── package.json                     # Dependencies & scripts
+└── README.md                        # This file
+```
+
+### Generated Artifacts (gitignored)
+
+- `vibe-reports/` - HTML/JSON/CSV reports
+- `test-results/` - Playwright screenshots and traces
+- `autoheal-cache/` - Cached selectors (smart-cache mode)
+- `vibe-training/` - Training data (training mode)
+- `playwright-report/` - Playwright HTML report
+
+---
 
 ## Supported AI Providers
 
@@ -238,6 +661,8 @@ const session = vibe()
 | **Local** | Varies | Free | ✅ Unlimited | Self-hosted (Ollama, etc.) |
 
 **Note:** With caching, subsequent runs cost $0 regardless of provider!
+
+---
 
 ## Troubleshooting
 
@@ -261,12 +686,50 @@ npx playwright install
 - Check internet connection
 - Try a faster AI provider (Groq)
 
-## Learn More
+### "No session files found" when viewing reports
+```bash
+# Run tests first
+npm test
+# Then view reports
+npm run view-unified
+```
 
-- [Vibe Framework Documentation](https://github.com/SanjayPG/vibe-framework)
+### "UnifiedReporter not found"
+```bash
+# Vibe framework needs to be compiled
+cd ../vibe-framework
+npm run build
+cd ../vibe-framework-demo
+```
+
+### Report shows stale data
+```bash
+# Use automated workflow (cleans automatically)
+npm run test:view
+```
+
+---
+
+## Documentation
+
+### Comprehensive Guides
+
+- 🏗️ **[ARCHITECTURE_FLOW.md](./ARCHITECTURE_FLOW.md)** - Complete healing mechanism (8 diagrams)
+- 🎯 **[HYBRID_APPROACH.md](./HYBRID_APPROACH.md)** - Mix Playwright + Natural Language (recommended!)
+- 🔄 **[HOOKS_AND_LIFECYCLE.md](./HOOKS_AND_LIFECYCLE.md)** - beforeAll, afterAll, session.shutdown()
+- 📊 **[FLOW_DIAGRAMS.md](./FLOW_DIAGRAMS.md)** - Visual execution flow (10 Mermaid diagrams)
+- 📘 **[ADVANCED_ELEMENTS_GUIDE.md](./ADVANCED_ELEMENTS_GUIDE.md)** - Complete guide to advanced elements
+- 📊 **[REPORTING.md](./REPORTING.md)** - Complete reporting configuration guide
+- 🎥 **[VIDEO_GUIDE.md](./VIDEO_GUIDE.md)** - Video recording setup
+
+### External Resources
+
+- [Vibe Framework on GitHub](https://github.com/SanjayPG/vibe-framework)
 - [Vibe Framework on npm](https://www.npmjs.com/package/@sdetsanjay/vibe-framework)
 - [AutoHeal Locator on npm](https://www.npmjs.com/package/@sdetsanjay/autoheal-locator)
 - [Playwright Documentation](https://playwright.dev/)
+
+---
 
 ## Contributing
 

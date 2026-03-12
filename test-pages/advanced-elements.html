@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Elements Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #333;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        select, input, button {
+            padding: 10px;
+            margin: 10px 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            background: #e8f5e9;
+            border-left: 4px solid #4CAF50;
+            display: none;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px 0;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Advanced Elements Test Page</h1>
+
+    <!-- Section 1: Select Boxes -->
+    <div class="section">
+        <h2>1. Select / Dropdown Tests</h2>
+
+        <label>Country Selector:</label>
+        <select id="country-select">
+            <option value="">-- Select a country --</option>
+            <option value="us">United States</option>
+            <option value="uk">United Kingdom</option>
+            <option value="ca">Canada</option>
+            <option value="au">Australia</option>
+            <option value="in">India</option>
+        </select>
+
+        <label>Size Selector:</label>
+        <select id="size-select">
+            <option value="">-- Select size --</option>
+            <option value="xs">Extra Small</option>
+            <option value="s">Small</option>
+            <option value="m">Medium</option>
+            <option value="l">Large</option>
+            <option value="xl">Extra Large</option>
+        </select>
+
+        <label>Subscription Plan:</label>
+        <select id="plan-select">
+            <option value="">-- Choose plan --</option>
+            <option value="free">Free</option>
+            <option value="basic">Basic - $9.99/mo</option>
+            <option value="premium">Premium - $19.99/mo</option>
+            <option value="enterprise">Enterprise - $49.99/mo</option>
+        </select>
+
+        <button onclick="showSelectResults()">Submit Selections</button>
+        <div id="select-result" class="result"></div>
+    </div>
+
+    <!-- Section 2: Alert, Confirm, Prompt -->
+    <div class="section">
+        <h2>2. Dialog Tests (Alert, Confirm, Prompt)</h2>
+
+        <button onclick="showAlert()">Show Alert</button>
+        <button onclick="showConfirm()">Show Confirm</button>
+        <button onclick="showPrompt()">Show Prompt</button>
+        <button onclick="showMultipleAlerts()">Show 3 Alerts in Sequence</button>
+
+        <div id="dialog-result" class="result"></div>
+    </div>
+
+    <!-- Section 3: New Window/Tab -->
+    <div class="section">
+        <h2>3. Window/Tab Tests</h2>
+
+        <button onclick="openNewWindow()">Open New Window</button>
+        <button onclick="window.open('new-window-content.html', '_blank')">Open in New Tab</button>
+        <a href="new-window-content.html" target="_blank" id="link-new-tab">Link: Open in New Tab</a>
+
+        <div id="window-result" class="result"></div>
+    </div>
+
+    <!-- Section 4: Multi-Select -->
+    <div class="section">
+        <h2>4. Multi-Select Test</h2>
+
+        <label>Select Your Skills (Hold Ctrl/Cmd for multiple):</label>
+        <select id="skills-select" multiple size="6">
+            <option value="js">JavaScript</option>
+            <option value="python">Python</option>
+            <option value="java">Java</option>
+            <option value="csharp">C#</option>
+            <option value="go">Go</option>
+            <option value="rust">Rust</option>
+        </select>
+
+        <button onclick="showSkillsResults()">Show Selected Skills</button>
+        <div id="skills-result" class="result"></div>
+    </div>
+
+    <!-- Section 5: Cascading Dropdowns -->
+    <div class="section">
+        <h2>5. Cascading Dropdowns</h2>
+
+        <label>Select Category:</label>
+        <select id="category-select" onchange="updateProducts()">
+            <option value="">-- Select category --</option>
+            <option value="electronics">Electronics</option>
+            <option value="clothing">Clothing</option>
+            <option value="books">Books</option>
+        </select>
+
+        <label>Select Product:</label>
+        <select id="product-select" disabled>
+            <option value="">-- First select a category --</option>
+        </select>
+
+        <div id="cascade-result" class="result"></div>
+    </div>
+
+    <script>
+        // Select box results
+        function showSelectResults() {
+            const country = document.getElementById('country-select').value;
+            const size = document.getElementById('size-select').value;
+            const plan = document.getElementById('plan-select').value;
+
+            const result = document.getElementById('select-result');
+            result.style.display = 'block';
+            result.innerHTML = `
+                <strong>Selections:</strong><br>
+                Country: ${country || 'Not selected'}<br>
+                Size: ${size || 'Not selected'}<br>
+                Plan: ${plan || 'Not selected'}
+            `;
+        }
+
+        // Alert dialogs
+        function showAlert() {
+            alert('This is a simple alert dialog!');
+            const result = document.getElementById('dialog-result');
+            result.style.display = 'block';
+            result.innerHTML = 'Alert was shown and closed.';
+        }
+
+        function showConfirm() {
+            const confirmed = confirm('Do you want to proceed?');
+            const result = document.getElementById('dialog-result');
+            result.style.display = 'block';
+            result.innerHTML = `Confirm result: ${confirmed ? 'OK clicked' : 'Cancel clicked'}`;
+        }
+
+        function showPrompt() {
+            const name = prompt('What is your name?', 'John Doe');
+            const result = document.getElementById('dialog-result');
+            result.style.display = 'block';
+            result.innerHTML = `Prompt result: ${name || 'Cancelled'}`;
+        }
+
+        function showMultipleAlerts() {
+            alert('Alert 1 of 3');
+            alert('Alert 2 of 3');
+            alert('Alert 3 of 3');
+            const result = document.getElementById('dialog-result');
+            result.style.display = 'block';
+            result.innerHTML = 'All 3 alerts were shown.';
+        }
+
+        // New window
+        function openNewWindow() {
+            window.open('new-window-content.html', 'newWindow', 'width=600,height=400');
+            const result = document.getElementById('window-result');
+            result.style.display = 'block';
+            result.innerHTML = 'New window opened!';
+        }
+
+        // Multi-select
+        function showSkillsResults() {
+            const select = document.getElementById('skills-select');
+            const selected = Array.from(select.selectedOptions).map(opt => opt.text);
+            const result = document.getElementById('skills-result');
+            result.style.display = 'block';
+            result.innerHTML = `<strong>Selected Skills:</strong><br>${selected.join(', ') || 'None selected'}`;
+        }
+
+        // Cascading dropdowns
+        const products = {
+            electronics: ['Laptop', 'Smartphone', 'Tablet', 'Headphones'],
+            clothing: ['T-Shirt', 'Jeans', 'Jacket', 'Shoes'],
+            books: ['Fiction', 'Non-Fiction', 'Science', 'History']
+        };
+
+        function updateProducts() {
+            const category = document.getElementById('category-select').value;
+            const productSelect = document.getElementById('product-select');
+
+            productSelect.innerHTML = '<option value="">-- Select product --</option>';
+
+            if (category && products[category]) {
+                productSelect.disabled = false;
+                products[category].forEach(product => {
+                    const option = document.createElement('option');
+                    option.value = product.toLowerCase();
+                    option.textContent = product;
+                    productSelect.appendChild(option);
+                });
+            } else {
+                productSelect.disabled = true;
+            }
+        }
+    </script>
+</body>
+</html>

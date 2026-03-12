@@ -11,19 +11,27 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { vibe } from '@sdetsanjay/vibe-framework';
+import { vibe, AIProvider } from '@sdetsanjay/vibe-framework';
 import dotenv from 'dotenv';
+import { getVideoConfig, getReportingConfig } from './helpers/vibeConfig';
 
 dotenv.config();
 
 test.describe('Parallel Execution Tests', () => {
   // Test 1: Login test
   test('parallel test 1 - login', async ({ page }) => {
+    const videoConfig = getVideoConfig();
+    const reportingConfig = getReportingConfig();
+
     const session = vibe()
       .withPage(page)
       .withMode('smart-cache')
-      .withAIProvider('GROQ', process.env.GROQ_API_KEY!)
-      .withReporting({ console: true })
+      .withAIProvider(AIProvider.GROQ, process.env.GROQ_API_KEY!)
+      .withReporting(reportingConfig)
+      .withVideo(videoConfig.mode, {
+        size: videoConfig.size,
+        dir: videoConfig.dir
+      })
       .build();
 
     await page.goto('https://www.saucedemo.com');
@@ -32,19 +40,27 @@ test.describe('Parallel Execution Tests', () => {
     await session.do('type "secret_sauce" into password field');
     await session.do('click the login button');
 
-    const result = await session.check('verify products page loaded');
-    expect(result.success).toBe(true);
+    // Wait for page to load
+    await page.waitForSelector('.inventory_list', { timeout: 5000 });
+    expect(page.url()).toContain('inventory.html');
 
     await session.shutdown();
   });
 
   // Test 2: Product listing test
   test('parallel test 2 - product listing', async ({ page }) => {
+    const videoConfig = getVideoConfig();
+    const reportingConfig = getReportingConfig();
+
     const session = vibe()
       .withPage(page)
       .withMode('smart-cache')
-      .withAIProvider('GROQ', process.env.GROQ_API_KEY!)
-      .withReporting({ console: true })
+      .withAIProvider(AIProvider.GROQ, process.env.GROQ_API_KEY!)
+      .withReporting(reportingConfig)
+      .withVideo(videoConfig.mode, {
+        size: videoConfig.size,
+        dir: videoConfig.dir
+      })
       .build();
 
     await page.goto('https://www.saucedemo.com');
@@ -61,11 +77,18 @@ test.describe('Parallel Execution Tests', () => {
 
   // Test 3: Add to cart test
   test('parallel test 3 - add to cart', async ({ page }) => {
+    const videoConfig = getVideoConfig();
+    const reportingConfig = getReportingConfig();
+
     const session = vibe()
       .withPage(page)
       .withMode('smart-cache')
-      .withAIProvider('GROQ', process.env.GROQ_API_KEY!)
-      .withReporting({ console: true })
+      .withAIProvider(AIProvider.GROQ, process.env.GROQ_API_KEY!)
+      .withReporting(reportingConfig)
+      .withVideo(videoConfig.mode, {
+        size: videoConfig.size,
+        dir: videoConfig.dir
+      })
       .build();
 
     await page.goto('https://www.saucedemo.com');
@@ -82,11 +105,18 @@ test.describe('Parallel Execution Tests', () => {
 
   // Test 4: Cart navigation test
   test('parallel test 4 - cart navigation', async ({ page }) => {
+    const videoConfig = getVideoConfig();
+    const reportingConfig = getReportingConfig();
+
     const session = vibe()
       .withPage(page)
       .withMode('smart-cache')
-      .withAIProvider('GROQ', process.env.GROQ_API_KEY!)
-      .withReporting({ console: true })
+      .withAIProvider(AIProvider.GROQ, process.env.GROQ_API_KEY!)
+      .withReporting(reportingConfig)
+      .withVideo(videoConfig.mode, {
+        size: videoConfig.size,
+        dir: videoConfig.dir
+      })
       .build();
 
     await page.goto('https://www.saucedemo.com');
@@ -98,8 +128,9 @@ test.describe('Parallel Execution Tests', () => {
     await session.do('click add to cart button for first product');
     await session.do('click shopping cart icon');
 
-    const result = await session.check('verify cart page is displayed');
-    expect(result.success).toBe(true);
+    // Wait for cart page to load
+    await page.waitForSelector('.cart_list', { timeout: 5000 });
+    expect(page.url()).toContain('cart.html');
 
     await session.shutdown();
   });

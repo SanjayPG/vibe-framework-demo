@@ -9,37 +9,43 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { vibe } from '@sdetsanjay/vibe-framework';
+import { vibe, AIProvider } from '@sdetsanjay/vibe-framework';
 import dotenv from 'dotenv';
+import { getVideoConfig, getReportingConfig } from './helpers/vibeConfig';
 
 // Load environment variables
 dotenv.config();
 
 test.describe('SauceDemo Login Flow', () => {
   test('should login successfully with valid credentials', async ({ page }) => {
-    // Create vibe session
+    // Create vibe session with video recording
+    const videoConfig = getVideoConfig();
+    const reportingConfig = getReportingConfig();
+
     const session = vibe()
       .withPage(page)
       .withMode('smart-cache')  // Cache selectors for 95-99% faster runs
-      .withAIProvider('GROQ', process.env.GROQ_API_KEY!)
-      .withReporting({
-        html: true,
-        console: true,
-        includeScreenshots: true
+      .withAIProvider(AIProvider.GROQ, process.env.GROQ_API_KEY!)
+      .withReporting(reportingConfig)
+      .withVideo(videoConfig.mode, {
+        size: videoConfig.size,
+        dir: videoConfig.dir
       })
       .build();
 
-    // Navigate to SauceDemo
+     // Standard Playwright — navigation
     await page.goto('https://www.saucedemo.com');
 
-    // Login using natural language
+     // Natural language — element interaction
     await session.do('type "standard_user" into username field');
     await session.do('type "secret_sauce" into password field');
     await session.do('click the login button');
 
-    // Verify login success
-    const result = await session.check('verify products page loaded');
-    expect(result.success).toBe(true);
+    // Standard Playwright — wait + assertion (no AI cost, no ambiguity)
+    await page.waitForSelector('.inventory_list', { timeout: 5000 });
+
+    // Verify we can see products by checking the URL
+    expect(page.url()).toContain('inventory.html');
 
     console.log('✅ Login successful!');
 
@@ -48,11 +54,18 @@ test.describe('SauceDemo Login Flow', () => {
   });
 
   test('should display product inventory after login', async ({ page }) => {
+    const videoConfig = getVideoConfig();
+    const reportingConfig = getReportingConfig();
+
     const session = vibe()
       .withPage(page)
       .withMode('smart-cache')
-      .withAIProvider('GROQ', process.env.GROQ_API_KEY!)
-      .withReporting({ html: true, console: true })
+      .withAIProvider(AIProvider.GROQ, process.env.GROQ_API_KEY!)
+      .withReporting(reportingConfig)
+      .withVideo(videoConfig.mode, {
+        size: videoConfig.size,
+        dir: videoConfig.dir
+      })
       .build();
 
     await page.goto('https://www.saucedemo.com');
@@ -67,17 +80,26 @@ test.describe('SauceDemo Login Flow', () => {
     console.log('First product:', firstProduct);
 
     expect(firstProduct).toBeTruthy();
-    expect(firstProduct.length).toBeGreaterThan(0);
+    if (firstProduct) {
+      expect(firstProduct.length).toBeGreaterThan(0);
+    }
 
     await session.shutdown();
   });
 
   test('should add item to cart and verify', async ({ page }) => {
+    const videoConfig = getVideoConfig();
+    const reportingConfig = getReportingConfig();
+
     const session = vibe()
       .withPage(page)
       .withMode('smart-cache')
-      .withAIProvider('GROQ', process.env.GROQ_API_KEY!)
-      .withReporting({ html: true, console: true })
+      .withAIProvider(AIProvider.GROQ, process.env.GROQ_API_KEY!)
+      .withReporting(reportingConfig)
+      .withVideo(videoConfig.mode, {
+        size: videoConfig.size,
+        dir: videoConfig.dir
+      })
       .build();
 
     await page.goto('https://www.saucedemo.com');
@@ -86,7 +108,6 @@ test.describe('SauceDemo Login Flow', () => {
     await session.do('type "standard_user" into username field');
     await session.do('type "secret_sauce" into password field');
     await session.do('click the login button');
-
     // Add item to cart
     await session.do('click the add to cart button for the first product');
 

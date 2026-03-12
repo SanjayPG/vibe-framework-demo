@@ -14,25 +14,27 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { vibe } from '@sdetsanjay/vibe-framework';
+import { vibe, AIProvider } from '@sdetsanjay/vibe-framework';
 import dotenv from 'dotenv';
+import { getVideoConfig, getReportingConfig } from './helpers/vibeConfig';
 
 dotenv.config();
 
 test.describe('Groq Provider Tests', () => {
   test('should work with Groq AI provider', async ({ page }) => {
-    // Configure with Groq provider
+    // Configure with Groq provider and video recording
+    const videoConfig = getVideoConfig();
+    const reportingConfig = getReportingConfig();
+
     const session = vibe()
       .withPage(page)
       .withMode('smart-cache')
-      .withAIProvider('GROQ', process.env.GROQ_API_KEY!)  // Using Groq
-      .withReporting({
-        html: true,
-        console: true,
-        includeScreenshots: true,
-        includeVideos: true
+      .withAIProvider(AIProvider.GROQ, process.env.GROQ_API_KEY!)  // Using Groq
+      .withReporting(reportingConfig)
+      .withVideo(videoConfig.mode, {
+        size: videoConfig.size,
+        dir: videoConfig.dir
       })
-      .withVideo('retain-on-failure')  // Record only failed tests
       .build();
 
     await page.goto('https://www.saucedemo.com');
@@ -42,9 +44,9 @@ test.describe('Groq Provider Tests', () => {
     await session.do('type "secret_sauce" into password field');
     await session.do('click the login button');
 
-    // Verify success
-    const loginResult = await session.check('verify products page loaded');
-    expect(loginResult.success).toBe(true);
+    // Verify success - wait for page load
+    await page.waitForSelector('.inventory_list', { timeout: 5000 });
+    expect(page.url()).toContain('inventory.html');
 
     // Extract product info
     const productName = await session.extract('name of first product');
@@ -59,18 +61,23 @@ test.describe('Groq Provider Tests', () => {
     expect(cartResult.success).toBe(true);
 
     console.log('✅ Groq provider test completed successfully!');
-    console.log(`📊 Execution time: ${loginResult.executionTime}ms`);
-    console.log(`💾 From cache: ${loginResult.fromCache}`);
 
     await session.shutdown();
   });
 
   test('should demonstrate cache benefit with Groq', async ({ page }) => {
+    const videoConfig = getVideoConfig();
+    const reportingConfig = getReportingConfig();
+
     const session = vibe()
       .withPage(page)
       .withMode('smart-cache')
-      .withAIProvider('GROQ', process.env.GROQ_API_KEY!)
-      .withReporting({ console: true })
+      .withAIProvider(AIProvider.GROQ, process.env.GROQ_API_KEY!)
+      .withReporting(reportingConfig)
+      .withVideo(videoConfig.mode, {
+        size: videoConfig.size,
+        dir: videoConfig.dir
+      })
       .build();
 
     await page.goto('https://www.saucedemo.com');
@@ -82,26 +89,28 @@ test.describe('Groq Provider Tests', () => {
     await session.do('type "secret_sauce" into password field');
     await session.do('click the login button');
 
-    const result = await session.check('verify products page loaded');
+    // Wait for inventory to load
+    await page.waitForSelector('.inventory_list', { timeout: 5000 });
+    expect(page.url()).toContain('inventory.html');
 
-    if (result.fromCache) {
-      console.log('⚡ Ultra-fast! Selector loaded from cache');
-    } else {
-      console.log('🤖 AI analysis performed (will be cached for next run)');
-    }
-
-    expect(result.success).toBe(true);
+    console.log('✅ Test completed - check console output for cache details');
 
     await session.shutdown();
   });
 
   test('should handle errors gracefully with Groq', async ({ page }) => {
+    const videoConfig = getVideoConfig();
+    const reportingConfig = getReportingConfig();
+
     const session = vibe()
       .withPage(page)
       .withMode('smart-cache')
-      .withAIProvider('GROQ', process.env.GROQ_API_KEY!)
-      .withReporting({ html: true, console: true })
-      .withVideo('retain-on-failure')
+      .withAIProvider(AIProvider.GROQ, process.env.GROQ_API_KEY!)
+      .withReporting(reportingConfig)
+      .withVideo(videoConfig.mode, {
+        size: videoConfig.size,
+        dir: videoConfig.dir
+      })
       .build();
 
     await page.goto('https://www.saucedemo.com');

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Window - Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #e3f2fd;
+            text-align: center;
+        }
+        h1 {
+            color: #1976d2;
+        }
+        button {
+            padding: 15px 30px;
+            margin: 10px;
+            background: #1976d2;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #1565c0;
+        }
+        .info {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        input {
+            padding: 10px;
+            margin: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 200px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🪟 New Window Opened Successfully!</h1>
+
+    <div class="info">
+        <p><strong>This is a new window/tab for testing purposes.</strong></p>
+        <p>Window name: <span id="window-name"></span></p>
+    </div>
+
+    <div class="info">
+        <h3>Test Actions in New Window:</h3>
+
+        <input type="text" id="new-window-input" placeholder="Type something here">
+
+        <br>
+
+        <button id="accept-button" onclick="acceptAction()">Accept & Close</button>
+        <button id="cancel-button" onclick="window.close()">Cancel & Close</button>
+        <button onclick="showNewWindowAlert()">Show Alert in New Window</button>
+    </div>
+
+    <div id="result" style="display:none; background: #e8f5e9; padding: 10px; margin: 10px 0; border-radius: 4px;">
+        Action completed!
+    </div>
+
+    <script>
+        // Display window name
+        document.getElementById('window-name').textContent = window.name || '(unnamed)';
+
+        function acceptAction() {
+            const input = document.getElementById('new-window-input').value;
+            const result = document.getElementById('result');
+            result.style.display = 'block';
+            result.innerHTML = `Accepted with value: "${input}"`;
+
+            // Close after 2 seconds
+            setTimeout(() => {
+                window.close();
+            }, 2000);
+        }
+
+        function showNewWindowAlert() {
+            alert('This alert is from the new window!');
+        }
+    </script>
+</body>
+</html>

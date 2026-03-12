@@ -36,8 +36,8 @@ export default defineConfig({
     // Screenshot on failure
     screenshot: 'only-on-failure',
 
-    // Video recording (managed by vibe-framework)
-    video: 'retain-on-failure',
+    // Video recording - set to 'on' to always record
+    video: 'on',
 
     // Browser viewport
     viewport: { width: 1280, height: 720 },
