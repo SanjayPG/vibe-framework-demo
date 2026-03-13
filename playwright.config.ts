@@ -10,8 +10,8 @@ export default defineConfig({
   // Test timeout
   timeout: 60000,
 
-  // Fail fast on CI
-  fullyParallel: false,
+  // Run tests in parallel
+  fullyParallel: true,
 
   // Retry failed tests
   retries: process.env.CI ? 2 : 0,
@@ -29,6 +29,9 @@ export default defineConfig({
   use: {
     // Base URL for navigation
     baseURL: 'https://www.saucedemo.com',
+
+    // Run with browser visible
+    headless: false,
 
     // Collect trace on failure
     trace: 'on-first-retry',

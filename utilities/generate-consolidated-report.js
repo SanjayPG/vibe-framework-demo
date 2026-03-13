@@ -8,10 +8,7 @@
  */
 
 const path = require('path');
-
-// Import from local vibe-framework
-const vibeFrameworkPath = path.join(__dirname, '..', 'vibe-framework', 'dist', 'reporting', 'ConsolidatedReporter.js');
-const { generateConsolidatedReport } = require(vibeFrameworkPath);
+const { generateConsolidatedReport } = require('@sdetsanjay/vibe-framework/dist/reporting/ConsolidatedReporter.js');
 
 const outputDir = path.join(__dirname, 'vibe-reports');
 

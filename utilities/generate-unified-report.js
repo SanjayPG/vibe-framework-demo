@@ -1,17 +1,4 @@
-const path = require('path');
-const fs = require('fs');
-
-// Import UnifiedReporter from vibe-framework
-const vibeFrameworkPath = path.join(__dirname, '..', 'vibe-framework', 'dist', 'reporting', 'UnifiedReporter.js');
-
-// Check if compiled version exists
-if (!fs.existsSync(vibeFrameworkPath)) {
-  console.error('❌ UnifiedReporter not found. Please compile vibe-framework first:');
-  console.error('   cd ../vibe-framework && npm run build');
-  process.exit(1);
-}
-
-const { UnifiedReporter } = require(vibeFrameworkPath);
+const { UnifiedReporter } = require('@sdetsanjay/vibe-framework/dist/reporting/UnifiedReporter.js');
 
 console.log('📊 Generating unified interactive report...\n');
 

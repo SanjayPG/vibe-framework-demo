@@ -24,7 +24,7 @@ Demo project showcasing [@sdetsanjay/vibe-framework](https://www.npmjs.com/packa
 
 ## What is Vibe Framework?
 
-Vibe Framework lets you write test commands in plain English instead of brittle CSS selectors:
+Vibe Framework lets you write test commands in plain English.
 
 ```typescript
 await session.do('click the login button');
@@ -129,76 +129,36 @@ flowchart TD
 
 ### Steps
 
-1. **Create a new Playwright project (if you don't have one):**
+1. **Clone this repository:**
 ```bash
-npm init playwright@latest
+git clone https://github.com/SanjayPG/vibe-framework-demo.git
+cd vibe-framework-demo
 ```
 
-2. **Install vibe-framework:**
+2. **Install dependencies:**
 ```bash
-npm install @sdetsanjay/vibe-framework
+npm install
 ```
 
-3. **Configure your API key:**
+3. **Install Playwright browsers:**
+```bash
+npx playwright install
+```
 
-Create a `.env` file in your project root:
+4. **Configure API key:**
+```bash
+# Copy the example environment file
+cp .env.example .env
 
-```env
+# Edit .env and add your API key
 # Choose one (Groq recommended for getting started - fast & free!)
 GROQ_API_KEY=your-groq-api-key-here
-
-# Or use Gemini (free tier available)
-# GEMINI_API_KEY=your-gemini-api-key-here
-
-# Or OpenAI
-# OPENAI_API_KEY=your-openai-api-key-here
 ```
 
 **Get API Keys:**
 - **Groq** (Recommended - Fast & Free): https://console.groq.com/
 - **Gemini** (Free Tier): https://aistudio.google.com/app/apikey
 - **OpenAI** (Paid): https://platform.openai.com/api-keys
-
-### Quick Start
-
-Create your first test file `tests/example.spec.ts`:
-
-```typescript
-import { test } from '@playwright/test';
-import { vibe } from '@sdetsanjay/vibe-framework';
-import dotenv from 'dotenv';
-
-dotenv.config();
-
-test('Login Example', async ({ page }) => {
-  const session = vibe()
-    .withPage(page)
-    .withMode('smart-cache')
-    .withAIProvider('GROQ', process.env.GROQ_API_KEY!)
-    .build();
-
-  await page.goto('https://www.saucedemo.com');
-  await session.do('type "standard_user" into username field');
-  await session.do('type "secret_sauce" into password field');
-  await session.do('click the login button');
-
-  await session.shutdown();
-});
-```
-
-Run your test:
-```bash
-npx playwright test
-```
-
-### Clone Demo Project (Optional)
-
-To explore all examples and utilities:
-```bash
-git clone https://github.com/SanjayPG/vibe-framework-demo.git
-cd vibe-framework-demo
-npm install
-```
 
 ---
 
@@ -236,9 +196,8 @@ node utilities/test-and-view.js tests/saucedemo.spec.ts:56
 If you want to run tests manually with `npx playwright test`, follow this pattern:
 
 ```bash
-# Step 1: Clean first
-npm run clean
-# or: node utilities/clean-sessions.js
+# Step 1: Clean reports first
+npm run clean:all
 
 # Step 2: Run your test manually
 npm test                                   # All tests
@@ -247,6 +206,12 @@ npx playwright test tests/file.spec.ts:56  # Specific test line
 
 # Step 3: View the report
 npm run view-unified
+```
+
+**Optional - Force fresh locators (clear cache):**
+```bash
+# Clean reports + cache, then run tests
+npm run clean:all && npm run clean:cache && npm test
 ```
 
 ---
@@ -271,26 +236,35 @@ In those cases, clean first with `npm run clean`, then run your manual command, 
 
 ```bash
 # Testing
-npm test                    # Run all tests
-npm run test:headed         # See browser
-npm run test:ui             # Interactive UI mode
-npm run test:parallel       # Parallel execution (4 workers)
-npm run test:debug          # Debug mode
+npm test                         # Run all tests
+npm run test:headed              # See browser
+npm run test:ui                  # Interactive UI mode
+npm run test:parallel            # Parallel execution (4 workers)
+npm run test:debug               # Debug mode
+
+# Parallel Tests
+npm run test:parallel-spec       # Run parallel-test.spec.ts with 4 workers
+npm run test:parallel-clean      # Clean all + run parallel tests
 
 # Automated Workflow (Recommended)
-npm run test:view           # Clean + Test + Report + Open
+npm run test:view                # Clean + Test + Report + Open
 
-# Utilities
-npm run clean               # Clean old reports
-npm run view-report         # View latest report
-npm run view-unified        # Generate + view unified report
-npm run view-consolidated   # Generate + view consolidated report
+# Cleaning
+npm run clean                    # Clean vibe-reports only
+npm run clean:all                # Clean ALL reports (vibe + playwright + test-results)
+npm run clean:cache              # Clear autoheal-cache (force fresh locators)
+
+# Viewing Reports
+npm run view-report              # View latest report
+npm run view-unified             # Generate + view unified report
+npm run view-consolidated        # Generate + view consolidated report
+npm run view-playwright          # View Playwright HTML report
 
 # Advanced Tests
-npm run test:advanced       # Advanced elements tests
-npm run test:selects        # Select boxes only
-npm run test:dialogs        # Alerts/Confirm/Prompt only
-npm run test:windows        # Window/tab switching only
+npm run test:advanced            # Advanced elements tests
+npm run test:selects             # Select boxes only
+npm run test:dialogs             # Alerts/Confirm/Prompt only
+npm run test:windows             # Window/tab switching only
 ```
 
 ---
@@ -586,7 +560,9 @@ Organized utility scripts for streamlined workflows:
 | Script | Purpose |
 |--------|---------|
 | `test-and-view.js` | Clean → Test → Report → Open (recommended) |
-| `clean-sessions.js` | Delete all test artifacts |
+| `clean-sessions.js` | Delete vibe-reports only |
+| `clean-all.js` | Delete ALL reports (vibe + playwright + test-results) |
+| `clean-cache.js` | Clear autoheal-cache (force fresh locators) |
 | `view-reports.js` | Open latest report |
 | `generate-unified-report.js` | Generate unified report |
 | `generate-consolidated-report.js` | Generate consolidated report |
@@ -598,9 +574,11 @@ Organized utility scripts for streamlined workflows:
 npm run test:view
 node utilities/test-and-view.js tests/file.spec.ts
 
-# Clean old reports
-npm run clean
-node utilities/clean-sessions.js
+# Clean reports
+npm run clean:all                    # All reports
+npm run clean                        # Vibe reports only
+npm run clean:cache                  # Cache only
+node utilities/clean-all.js
 
 # View reports
 npm run view-unified
@@ -616,7 +594,9 @@ node utilities/generate-unified-report.js
 ```
 vibe-framework-demo/
 ├── utilities/                         # 📦 Utility scripts
-│   ├── clean-sessions.js             # Clean all test artifacts
+│   ├── clean-sessions.js             # Clean vibe-reports only
+│   ├── clean-all.js                  # Clean ALL reports
+│   ├── clean-cache.js                # Clear autoheal-cache
 │   ├── test-and-view.js              # Automated test workflow
 │   ├── view-reports.js               # View latest report
 │   ├── generate-unified-report.js    # Generate unified report

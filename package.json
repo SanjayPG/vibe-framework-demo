@@ -19,7 +19,11 @@
     "test:windows": "playwright test tests/advanced-elements.spec.ts -g \"Window Switching\"",
     "test:login-setup": "playwright test tests/login-setup-example.spec.ts",
     "test:login-setup:headed": "playwright test tests/login-setup-example.spec.ts --headed",
+    "test:parallel-spec": "playwright test parallel-test.spec.ts --workers=4",
+    "test:parallel-clean": "node utilities/clean-all.js && playwright test parallel-test.spec.ts --workers=4",
     "clean": "node utilities/clean-sessions.js",
+    "clean:all": "node utilities/clean-all.js",
+    "clean:cache": "node utilities/clean-cache.js",
     "view-report": "node utilities/view-reports.js",
     "view-vibe": "node utilities/view-reports.js",
     "view-playwright": "npx playwright show-report",
@@ -40,7 +44,7 @@
   "author": "Sanjay Gorai",
   "license": "MIT",
   "dependencies": {
-    "@sdetsanjay/vibe-framework": "file:../vibe-framework",
+    "@sdetsanjay/vibe-framework": "^1.0.0",
     "dotenv": "^17.2.3"
   },
   "devDependencies": {
