@@ -36,10 +36,15 @@ module.exports = {
   ai: {
     provider: process.env.VIBE_AI_PROVIDER || 'GROQ',
     apiKey: process.env.GROQ_API_KEY || process.env.GEMINI_API_KEY || process.env.OPENAI_API_KEY,
+
+    // Optional: Custom model for cloud providers (overrides defaults)
+    // Examples: llama-3.3-70b-versatile, gemini-2.0-flash-exp, gpt-4o, deepseek-chat
+    model: process.env.VIBE_AI_MODEL,
+
     // Local model configuration (used when VIBE_AI_PROVIDER=LOCAL)
     baseUrl: process.env.LOCAL_MODEL_URL,
     apiPath: process.env.LOCAL_MODEL_API_PATH,
-    model: process.env.LOCAL_MODEL_NAME,
+    localModel: process.env.LOCAL_MODEL_NAME,
     format: process.env.LOCAL_MODEL_FORMAT,
     temperature: parseFloat(process.env.LOCAL_MODEL_TEMPERATURE || '0.1'),
     maxTokens: parseInt(process.env.LOCAL_MODEL_MAX_TOKENS || '2048')

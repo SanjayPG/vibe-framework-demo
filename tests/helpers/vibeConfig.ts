@@ -71,14 +71,18 @@ export function getAIConfig() {
       provider: 'LOCAL',
       baseUrl: config.baseUrl || process.env.LOCAL_MODEL_URL,
       apiPath: config.apiPath || process.env.LOCAL_MODEL_API_PATH,
-      model: config.model || process.env.LOCAL_MODEL_NAME,
+      model: config.localModel || config.model || process.env.LOCAL_MODEL_NAME,
       format: config.format || process.env.LOCAL_MODEL_FORMAT,
       temperature: config.temperature ?? parseFloat(process.env.LOCAL_MODEL_TEMPERATURE || '0.1'),
       maxTokens: config.maxTokens ?? parseInt(process.env.LOCAL_MODEL_MAX_TOKENS || '2048')
     };
   }
 
-  return config;
+  // For cloud providers, include optional custom model
+  return {
+    ...config,
+    customModel: config.model || process.env.VIBE_AI_MODEL
+  };
 }
 
 /**
@@ -105,10 +109,19 @@ export function configureAI(sessionBuilder: any) {
     });
   } else {
     const { AIProvider } = require('@sdetsanjay/vibe-framework');
-    return sessionBuilder.withAIProvider(
+
+    // Configure cloud provider
+    sessionBuilder = sessionBuilder.withAIProvider(
       AIProvider[aiConfig.provider as keyof typeof AIProvider],
       aiConfig.apiKey
     );
+
+    // Apply custom model if specified
+    if (aiConfig.customModel) {
+      sessionBuilder = sessionBuilder.withAIModel(aiConfig.customModel);
+    }
+
+    return sessionBuilder;
   }
 }
 
