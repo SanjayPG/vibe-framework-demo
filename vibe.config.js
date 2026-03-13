@@ -35,7 +35,14 @@ module.exports = {
   // AI Provider Configuration
   ai: {
     provider: process.env.VIBE_AI_PROVIDER || 'GROQ',
-    apiKey: process.env.GROQ_API_KEY || process.env.GEMINI_API_KEY || process.env.OPENAI_API_KEY
+    apiKey: process.env.GROQ_API_KEY || process.env.GEMINI_API_KEY || process.env.OPENAI_API_KEY,
+    // Local model configuration (used when VIBE_AI_PROVIDER=LOCAL)
+    baseUrl: process.env.LOCAL_MODEL_URL,
+    apiPath: process.env.LOCAL_MODEL_API_PATH,
+    model: process.env.LOCAL_MODEL_NAME,
+    format: process.env.LOCAL_MODEL_FORMAT,
+    temperature: parseFloat(process.env.LOCAL_MODEL_TEMPERATURE || '0.1'),
+    maxTokens: parseInt(process.env.LOCAL_MODEL_MAX_TOKENS || '2048')
   },
 
   // Cache Mode

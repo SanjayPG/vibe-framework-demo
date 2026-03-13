@@ -9,9 +9,9 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { vibe, AIProvider } from '@sdetsanjay/vibe-framework';
+import { vibe } from '@sdetsanjay/vibe-framework';
 import dotenv from 'dotenv';
-import { getVideoConfig, getReportingConfig } from './helpers/vibeConfig';
+import { getVideoConfig, getReportingConfig, configureAI } from './helpers/vibeConfig';
 
 // Load environment variables
 dotenv.config();
@@ -22,10 +22,14 @@ test.describe('SauceDemo Login Flow', () => {
     const videoConfig = getVideoConfig();
     const reportingConfig = getReportingConfig();
 
-    const session = vibe()
+    let sessionBuilder = vibe()
       .withPage(page)
-      .withMode('smart-cache')  // Cache selectors for 95-99% faster runs
-      .withAIProvider(AIProvider.GROQ, process.env.GROQ_API_KEY!)
+      .withMode('smart-cache');  // Cache selectors for 95-99% faster runs
+
+    // Configure AI provider (handles both cloud and local models)
+    sessionBuilder = configureAI(sessionBuilder);
+
+    const session = sessionBuilder
       .withReporting(reportingConfig)
       .withVideo(videoConfig.mode, {
         size: videoConfig.size,
@@ -57,10 +61,13 @@ test.describe('SauceDemo Login Flow', () => {
     const videoConfig = getVideoConfig();
     const reportingConfig = getReportingConfig();
 
-    const session = vibe()
+    let sessionBuilder = vibe()
       .withPage(page)
-      .withMode('smart-cache')
-      .withAIProvider(AIProvider.GROQ, process.env.GROQ_API_KEY!)
+      .withMode('smart-cache');
+
+    sessionBuilder = configureAI(sessionBuilder);
+
+    const session = sessionBuilder
       .withReporting(reportingConfig)
       .withVideo(videoConfig.mode, {
         size: videoConfig.size,
@@ -91,10 +98,13 @@ test.describe('SauceDemo Login Flow', () => {
     const videoConfig = getVideoConfig();
     const reportingConfig = getReportingConfig();
 
-    const session = vibe()
+    let sessionBuilder = vibe()
       .withPage(page)
-      .withMode('smart-cache')
-      .withAIProvider(AIProvider.GROQ, process.env.GROQ_API_KEY!)
+      .withMode('smart-cache');
+
+    sessionBuilder = configureAI(sessionBuilder);
+
+    const session = sessionBuilder
       .withReporting(reportingConfig)
       .withVideo(videoConfig.mode, {
         size: videoConfig.size,

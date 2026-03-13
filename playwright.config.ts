@@ -11,7 +11,7 @@ export default defineConfig({
   timeout: 60000,
 
   // Run tests in parallel
-  fullyParallel: true,
+  fullyParallel: false,
 
   // Retry failed tests
   retries: process.env.CI ? 2 : 0,
