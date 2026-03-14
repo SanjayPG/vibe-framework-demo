@@ -1,5 +1,14 @@
 # Vibe Framework Token Tracking Fix
 
+## ✅ FIXES NOW INCLUDED IN OFFICIAL PACKAGE
+
+**As of vibe-framework@1.1.3 (March 14, 2026), all fixes below are included in the official npm package.**
+
+No patches needed! Simply use:
+```bash
+npm install @sdetsanjay/vibe-framework@latest
+```
+
 ## Summary
 
 Successfully fixed AI token usage and cost tracking in vibe-framework reports. Token information and accurate costs now appear in console output, JSON exports, and unified HTML reports.
