@@ -35,7 +35,16 @@ module.exports = {
   // AI Provider Configuration
   ai: {
     provider: process.env.VIBE_AI_PROVIDER || 'GROQ',
-    apiKey: process.env.GROQ_API_KEY || process.env.GEMINI_API_KEY || process.env.OPENAI_API_KEY,
+    apiKey: (() => {
+      const provider = process.env.VIBE_AI_PROVIDER || 'GROQ';
+      if (provider === 'GEMINI') return process.env.GEMINI_API_KEY;
+      if (provider === 'OPENAI') return process.env.OPENAI_API_KEY;
+      if (provider === 'GROQ') return process.env.GROQ_API_KEY;
+      if (provider === 'ANTHROPIC') return process.env.ANTHROPIC_API_KEY;
+      if (provider === 'DEEPSEEK') return process.env.DEEPSEEK_API_KEY;
+      // Fallback to any available key
+      return process.env.GROQ_API_KEY || process.env.GEMINI_API_KEY || process.env.OPENAI_API_KEY;
+    })(),
 
     // Optional: Custom model for cloud providers (overrides defaults)
     // Examples: llama-3.3-70b-versatile, gemini-2.0-flash-exp, gpt-4o, deepseek-chat

@@ -44,7 +44,7 @@
   "author": "Sanjay Gorai",
   "license": "MIT",
   "dependencies": {
-    "@sdetsanjay/autoheal-locator": "^1.1.3",
+    "@sdetsanjay/autoheal-locator": "^1.1.4",
     "@sdetsanjay/vibe-framework": "^1.1.3",
     "dotenv": "^17.2.3"
   },

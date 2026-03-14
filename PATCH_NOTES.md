@@ -4,9 +4,14 @@
 
 **As of vibe-framework@1.1.3 (March 14, 2026), all fixes below are included in the official npm package.**
 
+**Latest Updates (March 14, 2026):**
+- **autoheal-locator@1.1.4**: Updated default Gemini model to `gemini-2.5-flash` (fixes 404 errors with deprecated model)
+- **vibe.config.js**: Fixed API key selection to match selected provider (prevents API key mismatches)
+
 No patches needed! Simply use:
 ```bash
 npm install @sdetsanjay/vibe-framework@latest
+npm install @sdetsanjay/autoheal-locator@latest
 ```
 
 ## Summary
