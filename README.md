@@ -1,6 +1,6 @@
 # Vibe Framework Demo 🎯
 
-Demo project showcasing [@sdetsanjay/vibe-framework](https://www.npmjs.com/package/@sdetsanjay/vibe-framework) - write test automation in natural language with Playwright.
+Demo project showcasing [@sdetsanjay/vibe-framework](https://www.npmjs.com/package/@sdetsanjay/vibe-framework) (v1.1.3) and [@sdetsanjay/autoheal-locator](https://www.npmjs.com/package/@sdetsanjay/autoheal-locator) (v1.1.4) - write test automation in natural language with Playwright.
 
 ## 📑 Table of Contents
 
@@ -47,6 +47,24 @@ expect(page.url()).toContain('dashboard');
 ```
 
 Built on [@sdetsanjay/autoheal-locator](https://www.npmjs.com/package/@sdetsanjay/autoheal-locator) with intelligent element detection and self-healing.
+
+### 🆕 Latest Updates (March 14, 2026)
+
+**vibe-framework@1.1.3** - Token Tracking & Cost Reporting
+- ✅ Real-time AI token usage tracking
+- ✅ Accurate cost calculation per action
+- ✅ Token counts in JSON/HTML reports
+- ✅ Provider-specific cost models
+
+**autoheal-locator@1.1.4** - Gemini Model Update
+- ✅ Updated to `gemini-2.5-flash` (from deprecated `gemini-2.0-flash-exp`)
+- ✅ Fixes 404 errors with Gemini API
+- ✅ Better JSON response reliability
+
+**Configuration Improvements**
+- ✅ Automatic API key selection based on provider
+- ✅ Clear mandatory vs optional settings in `.env.example`
+- ✅ No patches needed - all fixes in official packages
 
 ---
 
@@ -140,6 +158,11 @@ cd vibe-framework-demo
 npm install
 ```
 
+This installs:
+- `@sdetsanjay/vibe-framework@1.1.3` - Latest with token tracking
+- `@sdetsanjay/autoheal-locator@1.1.4` - Latest with Gemini 2.5 Flash
+- All fixes included, no patches needed!
+
 3. **Install Playwright browsers:**
 ```bash
 npx playwright install
@@ -151,14 +174,21 @@ npx playwright install
 cp .env.example .env
 
 # Edit .env and add your API key
-# Choose one (Groq recommended for getting started - fast & free!)
-GROQ_API_KEY=your-groq-api-key-here
+# The .env.example file clearly marks what's required (🟢 MANDATORY) vs optional (🔵 OPTIONAL)
+
+# Only 2 things are mandatory:
+GROQ_API_KEY=your-groq-api-key-here     # 🟢 MANDATORY: At least one API key
+VIBE_AI_PROVIDER=GROQ                   # 🟢 MANDATORY: Select your provider
+
+# Everything else has smart defaults! (video recording, reports, etc.)
 ```
 
 **Get API Keys:**
 - **Groq** (Recommended - Fast & Free): https://console.groq.com/
 - **Gemini** (Free Tier): https://aistudio.google.com/app/apikey
 - **OpenAI** (Paid): https://platform.openai.com/api-keys
+
+**Note:** The `.env.example` file documents all settings with clear mandatory/optional markers and default values!
 
 ---
 
@@ -297,8 +327,9 @@ module.exports = {
 
   // AI Provider
   ai: {
-    provider: 'GROQ',  // 'GROQ' | 'GEMINI' | 'OPENAI' | etc.
-    apiKey: process.env.GROQ_API_KEY
+    provider: 'GROQ',  // 'GROQ' | 'GEMINI' | 'OPENAI' | 'ANTHROPIC' | 'DEEPSEEK' | 'LOCAL'
+    apiKey: process.env.GROQ_API_KEY,  // Automatically selects key based on provider
+    model: process.env.VIBE_AI_MODEL    // Optional: Override default model
   },
 
   // Cache Mode
@@ -311,10 +342,18 @@ module.exports = {
 Override settings via environment variables:
 
 ```bash
+# Video & Reporting
 VIBE_VIDEO_MODE=on npm test
 VIBE_HTML_REPORT=false npm test
-VIBE_AI_PROVIDER=GEMINI npm test
+
+# AI Configuration
+VIBE_AI_PROVIDER=GEMINI npm test         # API key automatically selected
+VIBE_AI_MODEL=gemini-2.5-flash npm test  # Optional: Override default model
 VIBE_MODE=training npm test
+
+# All settings in .env.example are clearly marked:
+# 🟢 MANDATORY - Required (AI provider + API key)
+# 🔵 OPTIONAL - Has defaults (video, reporting, etc.)
 ```
 
 ---
@@ -631,16 +670,18 @@ vibe-framework-demo/
 
 ## Supported AI Providers
 
-| Provider | Speed | Cost | Free Tier | Setup |
-|----------|-------|------|-----------|-------|
-| **Groq** | ⚡⚡⚡⚡⚡ Fastest | Free | ✅ Generous | [console.groq.com](https://console.groq.com/) |
-| **Gemini** | ⚡⚡⚡⚡ Very Fast | ~$0.03/100 cmds | ✅ Yes | [aistudio.google.com](https://aistudio.google.com/) |
-| **OpenAI** | ⚡⚡⚡ Fast | ~$0.10/100 cmds | ❌ No | [platform.openai.com](https://platform.openai.com/) |
-| **DeepSeek** | ⚡⚡⚡ Fast | ~$0.01/100 cmds | ✅ Yes | [platform.deepseek.com](https://platform.deepseek.com/) |
-| **Anthropic** | ⚡⚡⚡ Fast | ~$0.30/100 cmds | ❌ No | [console.anthropic.com](https://console.anthropic.com/) |
-| **Local** | Varies | Free | ✅ Unlimited | Self-hosted (Ollama, etc.) |
+| Provider | Speed | Cost | Free Tier | Default Model | Setup |
+|----------|-------|------|-----------|---------------|-------|
+| **Groq** | ⚡⚡⚡⚡⚡ Fastest | Free | ✅ Generous | `llama-3.3-70b-versatile` | [console.groq.com](https://console.groq.com/) |
+| **Gemini** | ⚡⚡⚡⚡ Very Fast | Free* | ✅ Yes | `gemini-2.5-flash` | [aistudio.google.com](https://aistudio.google.com/) |
+| **OpenAI** | ⚡⚡⚡ Fast | ~$0.10/100 cmds | ❌ No | `gpt-4o-mini` | [platform.openai.com](https://platform.openai.com/) |
+| **DeepSeek** | ⚡⚡⚡ Fast | ~$0.01/100 cmds | ✅ Yes | `deepseek-chat` | [platform.deepseek.com](https://platform.deepseek.com/) |
+| **Anthropic** | ⚡⚡⚡ Fast | ~$0.30/100 cmds | ❌ No | `claude-3-5-sonnet` | [console.anthropic.com](https://console.anthropic.com/) |
+| **Local** | Varies | Free | ✅ Unlimited | Custom | Self-hosted (Ollama, etc.) |
 
-**Note:** With caching, subsequent runs cost $0 regardless of provider!
+**Note:** With smart-cache mode, subsequent runs cost $0 regardless of provider!
+
+*Gemini has generous free quota limits
 
 ---
 
