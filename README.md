@@ -160,7 +160,7 @@ npm install
 
 This installs:
 - `@sdetsanjay/vibe-framework@1.1.3` - Latest with token tracking
-- `@sdetsanjay/autoheal-locator@1.1.4` - Latest with Gemini 2.5 Flash
+- `@sdetsanjay/autoheal-locator@1.1.5` - Latest with Gemini 2.5 Flash
 - All fixes included, no patches needed!
 
 3. **Install Playwright browsers:**
