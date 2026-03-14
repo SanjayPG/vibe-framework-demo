@@ -4,6 +4,7 @@
   "private": true,
   "description": "Demo project showing vibe-framework and autoheal-locator usage from npm",
   "scripts": {
+    "postinstall": "patch-package",
     "test": "playwright test",
     "test:headed": "playwright test --headed",
     "test:ui": "playwright test --ui",
@@ -51,6 +52,7 @@
   "devDependencies": {
     "@playwright/test": "^1.57.0",
     "@types/node": "^25.4.0",
+    "patch-package": "^8.0.1",
     "playwright": "^1.40.0",
     "typescript": "^5.2.0"
   }

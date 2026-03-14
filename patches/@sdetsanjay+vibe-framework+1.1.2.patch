@@ -1,0 +1,190 @@
+diff --git a/node_modules/@sdetsanjay/vibe-framework/dist/core/VibeSession.js b/node_modules/@sdetsanjay/vibe-framework/dist/core/VibeSession.js
+index d316125..92a5527 100644
+--- a/node_modules/@sdetsanjay/vibe-framework/dist/core/VibeSession.js
++++ b/node_modules/@sdetsanjay/vibe-framework/dist/core/VibeSession.js
+@@ -125,7 +125,7 @@ class VibeSession {
+             const autoHealMeta = locator._autoHealMetadata || {};
+             // Track element finding metrics
+             if (this.reportingEnabled) {
+-                this.metrics.recordElementFinding(findEnd - findStart, autoHealMeta.cacheHit ?? false, autoHealMeta.healed ?? false, autoHealMeta.selector, this.config.aiModel || undefined);
++                this.metrics.recordElementFinding(findEnd - findStart, autoHealMeta.cacheHit ?? false, autoHealMeta.healed ?? false, autoHealMeta.selector, this.config.aiModel || undefined, autoHealMeta.tokensUsed);
+             }
+             // Step 3: Execute action
+             const execStart = Date.now();
+diff --git a/node_modules/@sdetsanjay/vibe-framework/dist/integration/AutoHealBridge.js b/node_modules/@sdetsanjay/vibe-framework/dist/integration/AutoHealBridge.js
+index 117509e..c4e841a 100644
+--- a/node_modules/@sdetsanjay/vibe-framework/dist/integration/AutoHealBridge.js
++++ b/node_modules/@sdetsanjay/vibe-framework/dist/integration/AutoHealBridge.js
+@@ -96,7 +96,22 @@ class AutoHealBridge {
+             // Determine if cache was hit or healing occurred
+             const cacheHit = cacheAfter.hitCount > cacheBefore.hitCount;
+             const cacheMiss = cacheAfter.missCount > cacheBefore.missCount;
+-            const healed = metricsAfter.successful_requests > metricsBefore.successful_requests && cacheMiss;
++            // Check reporter for actual healing status
++            let healed = false;
++            try {
++                const reporter = this.autoHeal.getReporter?.();
++                if (reporter && reporter.reports && reporter.reports.length > 0) {
++                    const lastReport = reporter.reports[reporter.reports.length - 1];
++                    // Check if the strategy used was DOM_ANALYSIS or VISUAL_ANALYSIS
++                    const { LocatorStrategy } = this.autoHealModule;
++                    healed = lastReport.strategy === LocatorStrategy.DOM_ANALYSIS ||
++                            lastReport.strategy === LocatorStrategy.VISUAL_ANALYSIS;
++                }
++            }
++            catch (e) {
++                // Fallback to metrics-based detection
++                healed = metricsAfter.successful_requests > metricsBefore.successful_requests && cacheMiss;
++            }
+             // Try to get the actual selector used by extracting element attributes
+             let actualSelector = selector;
+             try {
+@@ -119,12 +134,26 @@ class AutoHealBridge {
+                 // If we can't get element details, use the original selector
+                 actualSelector = selector;
+             }
++            // Get token usage from autoheal-locator's reporter
++            let tokensUsed = 0;
++            try {
++                const reporter = this.autoHeal.getReporter?.();
++                if (reporter && reporter.reports && reporter.reports.length > 0) {
++                    // Get the most recent report (last healing operation)
++                    const lastReport = reporter.reports[reporter.reports.length - 1];
++                    tokensUsed = lastReport.tokensUsed || 0;
++                }
++            }
++            catch (e) {
++                // Silently ignore if reporter not available
++            }
+             // Attach metadata to locator
+             locator._autoHealMetadata = {
+                 cacheHit,
+                 healed,
+                 selector: actualSelector,
+-                description
++                description,
++                tokensUsed
+             };
+             return locator;
+         }
+@@ -207,12 +236,15 @@ class AutoHealBridge {
+                 temperature: 0.1
+             };
+         }
++        // Ensure cache config has valid values (lru-cache requires at least one positive value)
++        const maxSize = this.config.cache.maxSize || 1000;  // Default to 1000 if 0 or undefined
++        const expireAfterWriteMs = this.config.cache.expireAfterWriteMs || 3600000; // Default to 1 hour
+         return {
+             ai: aiConfig,
+             cache: {
+                 type: this.mapCacheType(this.config.cache.type, AHCacheType),
+-                maxSize: this.config.cache.maxSize,
+-                expireAfterWriteMs: this.config.cache.expireAfterWriteMs
++                maxSize: maxSize,
++                expireAfterWriteMs: expireAfterWriteMs
+             },
+             performance: {
+                 executionStrategy: this.mapExecutionStrategy(this.config.executionStrategy, AHExecutionStrategy),
+diff --git a/node_modules/@sdetsanjay/vibe-framework/dist/reporting/JSONExporter.js b/node_modules/@sdetsanjay/vibe-framework/dist/reporting/JSONExporter.js
+index 8f66220..23a3d6a 100644
+--- a/node_modules/@sdetsanjay/vibe-framework/dist/reporting/JSONExporter.js
++++ b/node_modules/@sdetsanjay/vibe-framework/dist/reporting/JSONExporter.js
+@@ -159,7 +159,8 @@ class JSONExporter {
+                         parseAICalled: action.ai.parseAICalled,
+                         healingAICalled: action.ai.healingAICalled,
+                         model: action.ai.model,
+-                        estimatedCost: action.ai.estimatedCost
++                        estimatedCost: action.ai.estimatedCost,
++                        tokenUsage: action.ai.tokenUsage
+                     },
+                     // Include screenshots as base64 data URLs for unified report
+                     hasScreenshot: !!action.screenshot,
+diff --git a/node_modules/@sdetsanjay/vibe-framework/dist/reporting/MetricsCollector.d.ts b/node_modules/@sdetsanjay/vibe-framework/dist/reporting/MetricsCollector.d.ts
+index 18d1835..2fb1038 100644
+--- a/node_modules/@sdetsanjay/vibe-framework/dist/reporting/MetricsCollector.d.ts
++++ b/node_modules/@sdetsanjay/vibe-framework/dist/reporting/MetricsCollector.d.ts
+@@ -40,7 +40,7 @@ export declare class MetricsCollector {
+     /**
+      * Record element finding metrics
+      */
+-    recordElementFinding(latencyMs: number, cacheHit: boolean, healed: boolean, selector?: string, model?: string): void;
++    recordElementFinding(latencyMs: number, cacheHit: boolean, healed: boolean, selector?: string, model?: string, tokensUsed?: number): void;
+     /**
+      * Record action execution
+      */
+diff --git a/node_modules/@sdetsanjay/vibe-framework/dist/reporting/MetricsCollector.js b/node_modules/@sdetsanjay/vibe-framework/dist/reporting/MetricsCollector.js
+index be90a12..123b58f 100644
+--- a/node_modules/@sdetsanjay/vibe-framework/dist/reporting/MetricsCollector.js
++++ b/node_modules/@sdetsanjay/vibe-framework/dist/reporting/MetricsCollector.js
+@@ -113,7 +113,7 @@ class MetricsCollector {
+     /**
+      * Record element finding metrics
+      */
+-    recordElementFinding(latencyMs, cacheHit, healed, selector, model) {
++    recordElementFinding(latencyMs, cacheHit, healed, selector, model, tokensUsed) {
+         if (!this.currentAction)
+             return;
+         this.currentAction.latencyBreakdown.elementFinding = latencyMs;
+@@ -122,10 +122,36 @@ class MetricsCollector {
+         if (healed) {
+             this.currentAction.ai.healingAICalled = true;
+             this.currentAction.ai.model = model;
+-            // Estimate cost: ~4000 tokens DOM + 100 output = 4100 tokens
+-            // Varies by provider, using average
+-            // Gemini: ~$0.0003, OpenAI: ~$0.0006
+-            this.currentAction.ai.estimatedCost += 0.0004;
++            // Calculate real cost from token usage if available
++            if (tokensUsed && tokensUsed > 0) {
++                const { CostCalculator } = require('../utils/CostCalculator');
++                // Assume 80% input tokens, 20% output tokens (typical for healing)
++                const estimatedPromptTokens = Math.floor(tokensUsed * 0.8);
++                const estimatedCompletionTokens = Math.ceil(tokensUsed * 0.2);
++                const tokenUsageObj = {
++                    promptTokens: estimatedPromptTokens,
++                    completionTokens: estimatedCompletionTokens,
++                    totalTokens: tokensUsed
++                };
++                // Get the actual model name, using provider defaults if not specified
++                const provider = this.sessionConfig.aiProvider || 'GROQ';
++                const actualModel = model || this.sessionConfig.aiModel || this.getDefaultModelForProvider(provider);
++                const cost = CostCalculator.calculateCost(provider, actualModel, tokenUsageObj);
++                this.currentAction.ai.estimatedCost += cost;
++                this.currentAction.ai.model = actualModel;
++                // Store token usage for transparency
++                if (!this.currentAction.ai.tokenUsage) {
++                    this.currentAction.ai.tokenUsage = { parse: 0, healing: 0 };
++                }
++                this.currentAction.ai.tokenUsage.healing = tokensUsed;
++            }
++            else {
++                // Fallback to estimate if no token data
++                // Estimate cost: ~4000 tokens DOM + 100 output = 4100 tokens
++                // Varies by provider, using average
++                // Gemini: ~$0.0003, OpenAI: ~$0.0006
++                this.currentAction.ai.estimatedCost += 0.0004;
++            }
+         }
+     }
+     /**
+@@ -263,6 +289,20 @@ class MetricsCollector {
+             summary.performance.mostExpensiveAction = allActions.reduce((max, a) => a.ai.estimatedCost > max.ai.estimatedCost ? a : max);
+         }
+     }
++    /**
++     * Get default model for AI provider
++     */
++    getDefaultModelForProvider(provider) {
++        const defaultModels = {
++            'GEMINI': 'gemini-2.0-flash-exp',
++            'OPENAI': 'gpt-4o-mini',
++            'ANTHROPIC': 'claude-3-5-sonnet-20241022',
++            'DEEPSEEK': 'deepseek-chat',
++            'GROQ': 'llama-3.3-70b-versatile',
++            'LOCAL': 'local-model'
++        };
++        return defaultModels[provider] || 'gpt-4o-mini';
++    }
+ }
+ exports.MetricsCollector = MetricsCollector;
+ //# sourceMappingURL=MetricsCollector.js.map
+\ No newline at end of file
