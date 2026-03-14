@@ -18,6 +18,9 @@ import { getVideoConfig, getReportingConfig, configureAI } from './helpers/vibeC
 dotenv.config();
 
 test.describe('Parallel Execution Tests', () => {
+  // Enable parallel execution for all tests in this describe block
+  test.describe.configure({ mode: 'parallel' });
+
   // Test 1: Login test
   test('parallel test 1 - login', async ({ page }) => {
     const videoConfig = getVideoConfig();
